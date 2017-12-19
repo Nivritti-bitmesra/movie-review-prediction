@@ -1,10 +1,3 @@
-# -*- coding: utf-8 -*-
-"""
-Created on Sun Nov 12 21:29:58 2017
-
-@author: hp
-"""
-
 import re
 from collections import Counter
 from nltk.corpus import stopwords
@@ -20,7 +13,6 @@ from keras.layers import Flatten , Embedding
 from keras.layers.convolutional import Conv1D
 from keras.layers.convolutional import MaxPooling1D
 from keras.callbacks import EarlyStopping , ReduceLROnPlateau
-from keras.utils.vis_utils import plot_model
 from sklearn import metrics
 from gensim.models import Word2Vec
 from sklearn.decomposition import PCA
@@ -126,11 +118,11 @@ def NB_model(train_docs,test_docs,y_train,y_test):
     X_train = tokenizer.texts_to_matrix(train_docs, mode='freq')
     X_test = tokenizer.texts_to_matrix(test_docs, mode='freq')
     
-    clf = MultinomialNB()
-    clf.fit(X_train,y_train)  #implement Multinomial NB algo
+    model = MultinomialNB()
+    model.fit(X_train,y_train)  #implement Multinomial NB algo
     
-    acc_nb = metrics.accuracy_score(y_test,clf.predict(X_test))
-    print('Test Accuracy of Naive Bayes : %f' % (acc_nb))  
+    acc = metrics.accuracy_score(y_test,model.predict(X_test))
+    return acc  
 
 def CNN_model(train_docs,test_docs):
     encoded_docs = tokenizer.texts_to_sequences(train_docs)
@@ -176,25 +168,21 @@ def fit(model,X_train,X_test,y_train,y_test,epochs):
     loss, acc = model.evaluate(X_test, y_test, verbose=0)
     
     return acc
-
-def visualise_model(model):
-    plot_model(model , show_shapes = True)
     
 #fitting Multinomial Naive Bayes algorithm
-NB_model(train_docs,test_docs,y_train,y_test)
+acc_nb = NB_model(train_docs,test_docs,y_train,y_test)
+print('Test Accuracy of Multinomial Naive Bayes : %f' % (acc_nb*100))
 
 #Convolutional Neural Network model
 model_CNN,X_train,X_test = CNN_model(train_docs,test_docs)
-visualise_model(model_CNN)  #visualising model
 
 epochs = 10
 acc_conv = fit(model_CNN,X_train,X_test,y_train,y_test,epochs)
-print('Test Accuracy of Conv_Net : %f' % (acc_conv*100))
+print('Test Accuracy of CNN : %f' % (acc_conv*100))
 
 
 #Artificial Neural Network model
 model_ANN,X_train,X_test = ANN_model(train_docs,test_docs)
-visualise_model(model_ANN)
 
 epochs = 50
 acc_ann = fit(model_ANN,X_train,X_test,y_train,y_test,epochs)
